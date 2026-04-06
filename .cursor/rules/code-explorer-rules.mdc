@@ -1,0 +1,155 @@
+---
+description: Правила исследования кодовой базы 1C
+alwaysApply: true
+---
+### USE THIS PATH TEMPLATES
+- List of all objects: Configuration.xml
+- Object structure: [Type]/[Name].xml 
+	- Example:Catalogs/Номенклатура.xml 
+- Logic modules (code): 
+	- [Type]/[Name]/Ext/ObjectModule.bsl 
+		- Example:Catalogs/Номенклатура/Ext/ObjectModule.bsl 
+	- [Type]/[Name]/Ext/ManagerModule.bsl 
+		- Example:Catalogs/Номенклатура/Ext/ManagerModule.bsl 
+	- [Type]/[Name]/Commands/[CommandName]/Ext/CommandModule.bsl 
+		- Example:Catalogs/Номенклатура/Commands/Номенклатура/Ext/CommandModule.bsl 
+- Form structures: 
+	- [Type]/[Name]/Forms/[FormName]/Ext/Form.xml 
+		- Example:Catalogs/Номенклатура/Forms/ФормаВыбора/Ext/Form.xml 
+- Forms modules: 
+	- [Type]/[Name]/Forms/[FormName]/Ext/Form/Module.bsl
+		- Example:Catalogs/Номенклатура/Forms/ФормаВыбора/Ext/Form/Module.bsl
+- CommonForms modules: 
+	- CommonForms/[Name]/Ext/Form/Module.bsl 
+		- Example:CommonForms/АварийныйРежимИСМП/Ext/Form/Module.bsl 
+- CommonForms structures:
+	- CommonForms/[Name]/Ext/Form.xml 
+		- Example:CommonForms/АварийныйРежимИСМП/Ext/Form.xml 
+- Constants modules:
+	- Constants/[Name]/Ext/ValueManagerModule.bsl 
+		- Example:Constants/БазоваяВерсия/Ext/ValueManagerModule.bsl  
+- DefinedTypes structures:
+	- DefinedTypes/[Name].xml 
+		- Example:DefinedTypes/ВерсионируемыеДанныеОбъект.xml   
+- Enums modules
+	- Enums/[Name]/Ext/ManagerModule.bsl 
+		- Example:Enums/ВариантыОтраженияВУчетеВнеоборотныхАктивов/Ext/ManagerModule.bsl 
+- Roles structures:
+	- Roles/[Name]/Ext/Rights.xml 
+		- Example:Roles/ItobАдминистраторМониторинга/Ext/Rights.xml   
+- ChartsOfAccounts structures:
+	- ChartsOfAccounts/[Name]/Ext/Predefined.xml 
+		- Example:ChartsOfAccounts/Хозрасчетный/Ext/Predefined.xml
+- ChartsOfCharacteristicTypes structures:
+	- ChartsOfCharacteristicTypes/[Name]/Ext/Predefined.xml 
+		- Example:ChartsOfCharacteristicTypes/СтатьиРасходов/Ext/Predefined.xml 
+
+### Type Mapping (Exact spelling, Case-sensitive):
+**{Type} must be EXACTLY one of the following (case-sensitive, no changes allowed):**
+- Catalogs
+- Documents
+- InformationRegisters
+- AccumulationRegisters
+- AccountingRegisters
+- DataProcessors
+- Constants
+- CommonForms
+- CommonCommands
+- DocumentJournals
+- BusinessProcesses
+- DefinedTypes
+- Enums
+- Reports
+- Roles
+- ChartsOfCharacteristicTypes
+- ChartsOfAccounts
+
+### Alias Mapping (recognition only, never for paths):
+- Справочник, Справочники, Catalog → Catalogs  
+- Документ, Документы, Document → Documents  
+- РегистрСведений, РегистрыСведений, InformationRegister → InformationRegisters  
+- РегистрНакопления, РегистрыНакопления, AccumulationRegister → AccumulationRegisters  
+- РегистрБухгалтерии, РегистрыБухгалтерии, AccountingRegister → AccountingRegisters  
+- Обработка, Обработки, DataProcessor → DataProcessors  
+- Константа, Константы, Constant → Constants  
+- ОбщаяФорма, ОбщиеФормы, CommonForm → CommonForms  
+- ЖурналДокументов, ЖурналыДокументов, DocumentJournal → DocumentJournals  
+- БизнесПроцесс, БизнесПроцессы, BusinessProcess → BusinessProcesses  
+- ОбщаяКоманда, ОбщиеКоманды, CommonCommand → CommonCommands  
+- ОпределяемыйТип, ОпределяемыеТипы, DefinedType → DefinedTypes  
+- Перечисление, Перечисления, Enum → Enums  
+- Отчет, Отчеты, Report → Reports  
+- Роль, Роли, Role → Roles
+- ПланВидовХарактеристик, ПланыВидовХарактеристик, ChartsOfCharacteristicType → ChartsOfCharacteristicTypes
+- ПланСчетов, ПланыСчетов, ChartsOfAccount → ChartsOfAccounts
+
+### File priority rules:
+- If logic is requested -> open *.bsl module first
+- If UI / structure is requested -> open *.xml
+
+### RULE: MCP-FIRST (HIGHEST PRIORITY)
+- BEFORE any grep, sed, or Read operations — ALWAYS try MCP search tools first
+- **codesearch** replaces grep for code content search
+- **search_metadata** / **metadatasearch** replaces grep for metadata structure queries
+- **ssl_search** replaces grep for БСП function searches
+- File-based tools (grep/sed/Read) are SECONDARY — used only to read specific
+  file contents AFTER MCP tools identified the relevant files and line numbers
+- Violation: using grep/search when MCP equivalent is available = strategy error
+
+### RULE: NO DUPLICATE MCP SEARCHES
+- MCP search is for DISCOVERY — finding unknown files, procedures, call chains
+- Once MCP search identified files and locations — use path templates and direct reads
+- When tracing a call chain and you discover a procedure call like `ОбщийМодуль.Функция()`:
+  - Resolve the path using templates (CommonModules/ОбщийМодуль/Ext/Module.bsl)
+  - Read that file directly — DO NOT codesearch the procedure name again
+- Re-search via MCP ONLY when:
+  - The called module/object is unknown (not identified from prior search results)
+  - You need to find ALL usages of a pattern across the entire codebase
+  - The resolved file path does not exist (fallback search)
+- One MCP search per unique discovery question. Never search the same thing twice.
+
+### RULE: STRICT 1C FILE RESOLUTION
+- When an object reference is detected, DO NOT perform global search
+- Resolve paths ONLY using the templates above
+- Use filesystem Types only
+- If a file does not exist at the resolved path — report it, do not search elsewhere
+- If logic is requested → open *.bsl first
+- If UI / structure is requested → open *.xml
+
+# STRICT Optimization Rules for TOKEN ECONOMY:
+1. ЗАПРЕЩЕНО открывать или читать файлы целиком (включая "View file").
+2. Любое чтение — ТОЛЬКО через sed и ТОЛЬКО после grep-hit.
+3. Один файл — одно чтение контекста. Повторное разрешено только при новом grep-hit по другой логике (по другой логической гипотезе, другой тип проверки, другая процедура или другой реквизит) и для этого потребуется извлечь новый блок не покрытый предыдущим чтением.
+4. ЗАПРЕЩЕНО открывать файл для ознакомления: ПРЕЖДЕ чем использовать sed, найди точное имя процедуры/функции через grep, чтобы один раз извлечь её целиком от начала до конца.
+5. После grep-hit читай через sed:
+	5.1. Базовый диапазон: ±100 строк.
+	5.2. Если нашел вхождение через grep, используй sed для извлечения всего релевантного блока. 
+	5.3. Если вхождение найдено в файле .bsl, извлеки весь блок (Процедуру или Функцию) целиком, включая экспортные признаки и директивы компиляции (&НаСервере, &НаКлиенте и т.д.):
+	5.3.1. Если этот метод занимает до 200 строк — извлекай его полностью.
+	5.3.2. Если этот метод больше 200 строк — используй окно контекста ±100 строк вокруг найденного совпадения.
+	5.4. Работа с XML-файлами:
+	5.4.1. Если файл > 200 строк, сначала прочитай первые 150 строк. Это необходимо, чтобы сразу определить тип объекта (Документ, Справочник и т.д.) и его базовые свойства, которые в 1С начинаются после блока пространств имен.
+	5.4.2. При поиске через grep всегда бери контекст ±50 строк вокруг найденного места.
+	5.4.3. XML 1С очень однотипен. Чтобы не перепутать реквизит шапки с реквизитом табличной части (например, "Склад" может быть и там, и там), всегда проверяй ближайший родительский тег выше по тексту (<TabularSection>, <Attributes>, <Commands>).
+	5.4.4. Смысловой поиск (Синонимы): Не игнорируй теги <Synonym>. В них содержится человеческое название реквизита на русском языке. Используй их для связи пользовательских терминов в вопросе с техническими именами в коде (например, понимание того, что "Класс номенклатуры" — это "ВидНоменклатуры").   
+6. Разделяй файлы:
+	6.1. Логика, процедуры, функции, строки в коде — только *.bsl.
+	6.2. Структура, реквизиты, метаданные — только *.xml.
+7. Нарушение = ошибка стратегии.
+8. ЗАПРЕЩЕНО открывать файлы без подтвержденного вхождения. 
+9. Прицельный поиск: Чтобы не искать по всей базе, сначала определи путь к объекту, модулю (каталоги Documents, CommonModules и т.д.), затем ищи.
+10. ЗАПРЕЩЕНО просто перепечатывать код. Выводи только ключевые фрагменты, заменяя нерелевантные части (инициализацию структур, оформление интерфейса) комментарием // ... код пропущен ...».
+11. Ответ должен быть максимвально подробным, с подробным анализом результата со всеми нюансами, это поможет лучше анализировать и использовать ответ дальше. В ответе обязательно приводи ключевые фрагменты кода которые влияют на логику работы (это необходимо для понимания алгоритма работы), заменяя нерелевантные части комментарием // ... код пропущен ...». Давай ссылки на реквизиты объектов и реквизиты форм. Обязательно приводи ссылки на файлы с указанием строк, где расположеные ключевые моменты.
+
+## ИНСТРУКЦИЯ ПО ГЛУБОКОМУ АНАЛИЗУ (TRACE LOGIC). Call Stack Analysis Rules: Universal Deep Tracing for 1C Logic
+0. Твоя задача провести глубокий подробный анализ. Прежде чем анализировать код, напиши список из 3-5 потенциальных мест (формы выбора, модули менеджера, общие модули), где может быть логика. Только после этого приступай к поиску.
+1. Твоя задача — распутывать цепочки вызовов (Call Stack), а не анализировать один файл изолированно.
+2. Тебе не нужно «просмотреть файл» — тебе нужно найти, где решается задача, даже если это требует нескольких переходов между объектами.
+3. Отсутствие логики в текущем файле НИКОГДА не означает отсутствие логики вообще. Это значит, что она вынесена в связанный объект.
+4. Всегда думай как трассировщик выполнения: откуда пришли данные → куда они передаются → где могла быть применена логика. Рассматривай анализ как граф. 
+
+# AI Personality & Stability
+- Always prioritize deterministic and logical analysis over creative interpretation.
+- Use a "Strict Mode": do not guess code if it's not visible; instead, use available tools to find the source.
+- Before providing a final answer, verify the trace across multiple files (Call Stack).
+- Analyze the following task in strictly technical, step-by-step mode. Use only factual data from files. Do not hypothesize. If a link points to another object, you MUST explore it before concluding.
