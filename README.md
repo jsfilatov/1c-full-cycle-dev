@@ -284,15 +284,15 @@ flowchart LR
 | Агент | Фаза | Назначение | Происхождение роли |
 |-------|------|------------|-------------------|
 | `1c-code-explorer` | 2 | Глубокий анализ и трассировка кодовой базы | Линия [AndreevED/1c-ai-feature-dev-workflow](https://github.com/AndreevED/1c-ai-feature-dev-workflow), **модифицированный** промпт в проекте |
-| `1c-analytic` | 4 | PRD (`prd.md`) по Phase 0–3: требования, 1С-терминология, ID критериев приёмки; без кода | Промпт в проекте (например `analytic.md`); см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), Phase 4 |
+| `1c-analytic` | 4 | PRD (`prd.md`) по Phase 0–3: требования, 1С-терминология, ID критериев приёмки; без кода | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) (файл агента в проекте, напр. `analytic.md`); роль в конвейере — [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), Phase 4 |
 | `1c-architect` | 5, 6, 10 (при необходимости) | Архитектура, ADR, сверка кода с планом | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-arch-reviewer` | 7; 10 (пост-реализация) | Ревью плана до реализации и аудит соответствия после Phase 9 | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-developer` | 9; исправления в 10; приёмочные доработки | Реализация BSL и правки кода (вход: `phase9-context-index.md`) | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-metadata-manager` | 9; исправления в 10; приёмочные доработки | Мутации метаданных в XML (вход: `phase9-context-index.md`; см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md)) | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-error-fixer` | 9 (опц.) | Синтаксис BSL при исполнителе `1c-developer` | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-code-reviewer` | 10 | Ревью кода | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
-| `1c-performance-optimizer` | 10 (опц.) | Узкий проход по производительности при NFR или HIGH+ | см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md) |
-| `1c-tester` | 10 (опц.) | Смоук/UI по запросу или готовому сценарию | см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md) |
+| `1c-performance-optimizer` | 10 (опц.) | Узкий проход по производительности при NFR или HIGH+ | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c); условия вызова — [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), Phase 10 |
+| `1c-tester` | 10 (опц.) | Смоук/UI по запросу или готовому сценарию | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c); условия вызова — [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), Phase 10 |
 | `1c-doc-writer` | 12 | Обновление документации проекта | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 
 В каталоге `.cursor/agents/` файлы могут называться, например, `developer.md`, `architect.md`, `analytic.md`; обращение в Cursor идёт по полю `name` в frontmatter (например `name: 1c-developer`, `name: 1c-analytic`).
