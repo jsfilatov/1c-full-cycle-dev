@@ -8,7 +8,7 @@
 
 - **Воркфлоу** — **глубоко модернизирован** относительно идей и структуры [AndreevED/1c-ai-feature-dev-workflow](https://github.com/AndreevED/1c-ai-feature-dev-workflow) (в том репозитории — исходный AI-воркфлоу для доработок 1С; корни подхода — feature-dev Anthropic). Текущий навык расширяет процесс до **фаз 0–12**, вводит формальный **PRD**, **ADR**, приёмку, индекс контекста для реализации и отдельный режим доработок по приёмке.
 - **Агент `1c-code-explorer`** (Phase 2) — **изменённый** вариант агента исследования кодовой базы из линии [AndreevED/1c-ai-feature-dev-workflow](https://github.com/AndreevED/1c-ai-feature-dev-workflow); в проекте размещается как файл в `.cursor/agents/` (например `1c-code-explorer.md` или эквивалент с тем же `name` в frontmatter).
-- **Остальные роли** (`1c-developer`, `1c-architect`, `1c-arch-reviewer`, `1c-code-reviewer`, `1c-doc-writer` и связанная инфраструктура правил, MCP, навыков) ориентированы на набор [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c): правила в `.cursor/rules/`, агенты в `.cursor/agents/` (имена с префиксом `1c-` задаются в YAML frontmatter файлов).
+- **Остальные роли** (`1c-developer`, `1c-architect`, `1c-arch-reviewer`, `1c-code-reviewer`, `1c-doc-writer`, `1c-analytic` и связанная инфраструктура правил, MCP, навыков) ориентированы на набор [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c): правила в `.cursor/rules/`, агенты в `.cursor/agents/` (имена с префиксом `1c-` задаются в YAML frontmatter файлов).
 
 Навык **не содержит** полных промптов агентов — только маршрутизацию фаз и артефактов.
 
@@ -41,7 +41,7 @@
 | 1 | Discovery, подтверждение понимания | `phase1-requirements.md` |
 | 2 | Исследование кодовой базы (адаптивно) | `phase2-exploration.md` |
 | 3 | Уточняющие вопросы до проектирования | `phase3-clarifications.md` |
-| 4 | PRD, gate | `prd.md` |
+| 4 | PRD через **`1c-analytic`**, gate | `prd.md` (структура по [`SKILL.md`](./SKILL.md); оркестратор брифует, аналитик пишет файл) |
 | 5 | Архитектурный план, gate | `phase5-architecture.md` |
 | 6 | ADR, обновление PRD (связанные артефакты), gate по сложности | `adr.md` |
 | 7 | Ревью плана (с учётом ADR), gate | `phase7-plan-review.md` |
@@ -82,28 +82,31 @@
 | Агент | Фаза | Назначение | Происхождение роли |
 |-------|------|------------|-------------------|
 | `1c-code-explorer` | 2 | Глубокий анализ и трассировка кодовой базы | Линия [AndreevED/1c-ai-feature-dev-workflow](https://github.com/AndreevED/1c-ai-feature-dev-workflow), **модифицированный** промпт в проекте |
+| `1c-analytic` | 4 | PRD (`prd.md`) по Phase 0–3: требования, 1С-терминология, ID критериев приёмки; без кода | Промпт в проекте (например `analytic.md`); см. [`SKILL.md`](./SKILL.md), Phase 4 |
 | `1c-architect` | 5, 6, 10 (при необходимости) | Архитектура, ADR, сверка кода с планом | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-arch-reviewer` | 7 | Ревью архитектурного плана с учётом ADR | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-developer` | 9; исправления в 10; приёмочные доработки | Реализация и исправления (вход: `phase9-context-index.md`) | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-code-reviewer` | 10 | Ревью кода | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 | `1c-doc-writer` | 12 | Обновление документации проекта | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 
-В каталоге `.cursor/agents/` файлы могут называться, например, `developer.md`, `architect.md`; обращение в Cursor идёт по полю `name` в frontmatter (например `name: 1c-developer`).
+В каталоге `.cursor/agents/` файлы могут называться, например, `developer.md`, `architect.md`, `analytic.md`; обращение в Cursor идёт по полю `name` в frontmatter (например `name: 1c-developer`, `name: 1c-analytic`).
 
 ## Использование агентов отдельно
 
 Полный цикл необязателен — отдельные роли можно вызывать по смыслу задачи, например:
 
 - «Запусти `1c-code-explorer` для разбора цепочки вызовов при проведении документа X».
+- «Запусти `1c-analytic` для черновика PRD по папке `.tasks/task-…` и артефактам Phase 1–3» (в полном цикле это делает оркестратор в Phase 4).
 - «Запусти `1c-architect` для вариантов реализации интеграции с внешним API».
 - «Запусти `1c-developer` для реализации процедуры Y по краткому ТЗ».
 - «Запусти `1c-code-reviewer` для проверки последних изменений в модуле Z».
 
 ## Установка
 
-1. Развернуть в проекте содержимое [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) в `.cursor/` (правила, агенты, рекомендуемые навыки) и настроить MCP-серверы по их документации (в README репозитория — ссылка на vibecoding1c.ru).
+1. Развернуть в проекте содержимое [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) в `.cursor/` (правила, агенты — в т.ч. **`1c-analytic`** для Phase 4 / PRD, рекомендуемые навыки) и настроить MCP-серверы по их документации (в README репозитория — ссылка на vibecoding1c.ru).
 2. Добавить агент **`1c-code-explorer`**: файл в `.cursor/agents/` на основе **изменённой** версии линии [AndreevED/1c-ai-feature-dev-workflow](https://github.com/AndreevED/1c-ai-feature-dev-workflow), с полем `name: 1c-code-explorer`.
-3. Скопировать каталог навыка `1c-full-cycle-dev` в `.cursor/skills/` текущего репозитория (рядом с этим `README.md` должен лежать [`SKILL.md`](./SKILL.md)).
+3. Скопировать правило Cursor **`code-explorer-rules.mdc`** в каталог **`.cursor/rules/`** целевого проекта (в этом репозитории — путь [`.cursor/rules/code-explorer-rules.mdc`](../../rules/code-explorer-rules.mdc)). Оно задаёт шаблоны путей к объектам 1С, приоритет MCP при поиске и правила глубокой трассировки для Phase 2; без него поведение **`1c-code-explorer`** может не совпадать с ожидаемым. Если вы переносите только каталог навыка без остальных файлов проекта — скопируйте это правило **отдельно**.
+4. Скопировать каталог навыка `1c-full-cycle-dev` в `.cursor/skills/` текущего репозитория (рядом с этим `README.md` должен лежать [`SKILL.md`](./SKILL.md)).
 
 ## Кастомизация
 
@@ -124,12 +127,12 @@
 
 - Среда с поддержкой субагентов (Cursor или аналог).
 - Конфигурация 1С, выгруженная в файлы (или согласованный с проектом способ работы с исходниками).
-- MCP-инструменты для 1С по рекомендациям [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) — для качества исследования (Phase 2) и реализации/ревью (Phase 9–10).
+- MCP-инструменты для 1С по рекомендациям [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) — для качества исследования (Phase 2), подготовки PRD аналитиком (Phase 4) и реализации/ревью (Phase 9–10).
 
 ## Особенности относительно исходного воркфлоу AndreevED
 
 - Жёсткая последовательность **всех** фаз 0–12 для новой доработки (без «упрощённого пропуска» PRD/ADR/ревью плана по причине простой задачи).
-- Формальные **PRD** и **ADR** с обязательными блоками специфики 1С в ADR.
+- Формальные **PRD** (Phase 4 — субагент **`1c-analytic`**, шаблон `prd.md` в [`SKILL.md`](./SKILL.md)) и **ADR** с обязательными блоками специфики 1С в ADR.
 - **Phase Gate**: без объединения нескольких обязательных подтверждений в один вопрос.
 - **`acceptance-record.md`** со стабильными ID и режим доработок по приёмке.
 - Единый контракт **`phase9-context-index.md`** для передачи контекста в `1c-developer`.

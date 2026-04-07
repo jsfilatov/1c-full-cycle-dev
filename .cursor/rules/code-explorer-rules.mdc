@@ -89,7 +89,7 @@ alwaysApply: true
 
 ### RULE: MCP-FIRST (HIGHEST PRIORITY)
 - BEFORE any grep, sed, or Read operations — ALWAYS try MCP search tools first
-- **codesearch** replaces grep for code content search
+- **search_code** / **codesearch** replaces grep for code content search
 - **search_metadata** / **metadatasearch** replaces grep for metadata structure queries
 - **ssl_search** replaces grep for БСП function searches
 - File-based tools (grep/sed/Read) are SECONDARY — used only to read specific
