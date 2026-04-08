@@ -88,13 +88,14 @@ alwaysApply: true
 - If UI / structure is requested -> open *.xml
 
 ### RULE: MCP-FIRST (HIGHEST PRIORITY)
-- BEFORE any grep, sed, or Read operations — ALWAYS try MCP search tools first
-- **search_code** / **codesearch** replaces grep for code content search
-- **search_metadata** / **metadatasearch** replaces grep for metadata structure queries
-- **ssl_search** replaces grep for БСП function searches
-- File-based tools (grep/sed/Read) are SECONDARY — used only to read specific
-  file contents AFTER MCP tools identified the relevant files and line numbers
-- Violation: using grep/search when MCP equivalent is available = strategy error
+- Перечень инструментов, серверов и сценариев «по задаче» — в `@rules/mcp-tools.mdc`; при обновлении MCP ориентируйся на него, не на устаревшие перечни в этом файле.
+- До обходного поиска по диску (grep/полный Read) — сначала MCP-инструменты, если они доступны в сессии.
+- Поиск по коду: **codesearch** (имени `search_code` в справочнике `mcp-tools.mdc` нет — не использовать как отдельное имя инструмента).
+- Метаданные: **metadatasearch** + **get_metadata_details**; альтернатива/граф — **search_metadata**, **business_search**, **answer_metadata_question** (когда нужен другой способ или нет технического имени).
+- Трассировка и архитектура: **search_function**, **get_module_structure**, **get_method_call_hierarchy**, **graph_dependencies**; контекст API — **bsl_scope_members**.
+- Документация платформы: **docinfo** (точное имя) / **docsearch** (по описанию); справка конфигурации — **helpsearch**; БСП — **ssl_search**.
+- Файловые инструменты (grep / Read с offset / sed) — вторичны: после того как MCP (или известный путь по шаблонам) указал файл и при необходимости якорь (строка, имя метода). Если MCP уже вернул диапазон строк — допускается **Read** с `offset`/`limit` без предварительного grep.
+- Нарушение: использовать grep как основной способ «найти неизвестное», когда доступен эквивалент из `mcp-tools.mdc`.
 
 ### RULE: NO DUPLICATE MCP SEARCHES
 - MCP search is for DISCOVERY — finding unknown files, procedures, call chains
@@ -118,10 +119,10 @@ alwaysApply: true
 
 # STRICT Optimization Rules for TOKEN ECONOMY:
 1. ЗАПРЕЩЕНО открывать или читать файлы целиком (включая "View file").
-2. Любое чтение — ТОЛЬКО через sed и ТОЛЬКО после grep-hit.
-3. Один файл — одно чтение контекста. Повторное разрешено только при новом grep-hit по другой логике (по другой логической гипотезе, другой тип проверки, другая процедура или другой реквизит) и для этого потребуется извлечь новый блок не покрытый предыдущим чтением.
-4. ЗАПРЕЩЕНО открывать файл для ознакомления: ПРЕЖДЕ чем использовать sed, найди точное имя процедуры/функции через grep, чтобы один раз извлечь её целиком от начала до конца.
-5. После grep-hit читай через sed:
+2. Любое чтение — фрагментарно: после **grep-hit** или после якоря от **MCP**/шаблона путей (файл ± строка / имя метода); допускается **Read** с `offset`/`limit` (или sed с диапазоном), без загрузки всего файла.
+3. Один файл — одно чтение контекста. Повторное разрешено только при новом **grep-hit** или новом **якоре MCP** по другой логике (другая гипотеза, процедура, реквизит) и если нужен блок, не покрытый предыдущим чтением.
+4. ЗАПРЕЩЕНО открывать файл для ознакомления: сначала зафиксируй цель чтения — имя процедуры/функции или строку (через grep, **search_function**, **get_module_structure** или результат **codesearch**), затем извлеки нужный блок одним проходом.
+5. После grep-hit или эквивалентного якоря (MCP) читай фрагмент (sed или Read с окном):
 	5.1. Базовый диапазон: ±100 строк.
 	5.2. Если нашел вхождение через grep, используй sed для извлечения всего релевантного блока. 
 	5.3. Если вхождение найдено в файле .bsl, извлеки весь блок (Процедуру или Функцию) целиком, включая экспортные признаки и директивы компиляции (&НаСервере, &НаКлиенте и т.д.):

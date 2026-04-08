@@ -18,15 +18,23 @@ allowParallel: true
 (grep, sed, Read) when they are available. This applies to ALL analysis tasks —
 exploring existing code is no exception.
 
-See `@rules/mcp-tools.mdc` for tool descriptions.
+**Источник правды по инструментам** — `@rules/mcp-tools.mdc`. При любом расхождении с текстом агента или `code-explorer-rules` приоритет у `mcp-tools.mdc`; не дублировать полные таблицы инструментов здесь.
 
-**Required workflow for code exploration:**
-1. **search_code** / **codesearch** — find existing implementations and call chains FIRST
-2. **search_metadata** / **metadatasearch** — verify object/attribute structure
-3. **docsearch** — verify method/property existence in platform docs
-4. **ssl_search** — check if logic is delegated to БСП
+**Обязательный порядок для исследования кода (трассировка, архитектура, зависимости):**
+1. **codesearch** — первичный поиск вхождений, паттернов, комментариев в BSL/модулях (см. лимиты и параметры в `mcp-tools.mdc`).
+2. **search_function** — когда известно имя процедуры/функции; точка входа в реализацию.
+3. **get_method_call_hierarchy** — кто вызывает метод и что он вызывает (цепочки для call stack).
+4. **graph_dependencies** — связи объектов метаданных (вперёд/назад) перед выводами об архитектуре.
+5. **get_module_structure** — обзор модуля перед точечным чтением файлов.
+6. **metadatasearch** + **get_metadata_details** — структура объектов, реквизиты, типы; при необходимости графа — **search_metadata** / **business_search** / **answer_metadata_question** (см. раздел Graph Metadata в `mcp-tools.mdc`).
+7. **docinfo** (если имя метода/типа известно) / **docsearch** (если имя неизвестно) — платформа 1С.
+8. **helpsearch** — встроенная HTML-справка конфигурации по смыслу объекта/функции.
+9. **ssl_search** — делегирование в БСП/стандартные подсистемы.
+10. **bsl_scope_members** — доступные методы/свойства контекста (например `Справочник.Имя`), когда нужно понять API контекста.
 
-Only after MCP search results, proceed to file-based analysis using rules in `@rules/code-explorer-rules.mdc`.
+При трассировке через **формы** или **разметку метаданных**: **search_metadata_forms**, **get_metadata_form_details**, **search_metadata_xml**; при необходимости проверки сгенерированного XML — **get_xsd_schema**, **verify_xml** (см. разделы Metadata XML & Forms и XSD в `mcp-tools.mdc`).
+
+Дальше — точечное чтение файлов по правилам `@rules/code-explorer-rules.mdc` (после того как MCP дал путь и якоря: строки, имя метода, объект метаданных).
 
 ## Analysis Approach
 

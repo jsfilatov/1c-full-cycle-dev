@@ -45,7 +45,7 @@
 | 5 | Архитектурный план, gate | `phase5-architecture.md` |
 | 6 | ADR, обновление PRD (связанные артефакты), gate по сложности | `adr.md` |
 | 7 | Ревью плана (с учётом ADR), gate | `phase7-plan-review.md` |
-| 8 | Таск-лист, запись приёмки, индекс контекста Phase 9, gate | `tasks.md`, `acceptance-record.md`, `phase9-context-index.md` |
+| 8 | Таск-лист, запись приёмки, индекс контекста Phase 9, gate | `tasks.md`, `acceptance-record.md`, `phase9-context-index.md` (при провале декомпозиции — опц. **`1c-planner`**, см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md)) |
 | 9 | Реализация по подзадачам: `1c-developer` и при метаданных — `1c-metadata-manager`; опц. `1c-error-fixer` (BSL) | исходники 1С в репо + `tasks.md`, `phase9-context-index.md` |
 | 10 | Ревью кода | `phase10-code-review.md` |
 | 11 | Итоги, вопрос об обновлении документации, gate | `phase11-summary.md` |
@@ -193,7 +193,7 @@ flowchart LR
   ex --> idx9u["phase9-context-index.md updated"]
 ```
 
-Оркестратор при необходимости вызывает **`1c-error-fixer`** (только для BSL и исполнителя `1c-developer`). Исполнитель читает канонические пути из индекса — см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md).
+**Контракт исполнителя (Phase 9):** `1c-developer` и `1c-metadata-manager` **не задают вопросов конечному пользователю**; при блокере останавливаются и передают отчёт оркестратору (переопределение относительно `developer.md`; политика эскалации — в [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), Phase 9). Оркестратор при необходимости вызывает **`1c-error-fixer`** (только для BSL и исполнителя `1c-developer`). Канонические пути — в таблице индекса.
 
 ### Phase 10: Ревью кода
 
@@ -209,7 +209,7 @@ flowchart LR
   P10 -.->|fix now| tsec["tasks.md fix sections"]
 ```
 
-Ветка ревьюеров: при **простой** задаче и не сработавшем пороге объёма — в основном `1c-code-reviewer`; при **средней/сложной** или крупном охвате — пара `1c-arch-reviewer` + `1c-code-reviewer` (детали и опции `1c-performance-optimizer` / `1c-tester` — в [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md)).
+Ветка ревьюеров: при **простой** задаче и не сработавшем пороге объёма — в основном `1c-code-reviewer`; при **средней/сложной** или крупном охвате — пара `1c-arch-reviewer` + `1c-code-reviewer`. По **явному запросу** пользователя перед ревью можно узко вызвать **`1c-code-simplifier`** (читаемость без смены поведения). Детали и опции `1c-performance-optimizer` / `1c-tester` — в [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md).
 
 ### Phase 11: Итоги
 
@@ -295,6 +295,15 @@ flowchart LR
 | `1c-tester` | 10 (опц.) | Смоук/UI по запросу или готовому сценарию | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c); условия вызова — [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), Phase 10 |
 | `1c-doc-writer` | 12 | Обновление документации проекта | [comol/cursor_rules_1c](https://github.com/comol/cursor_rules_1c) |
 
+### Дополнительные агенты (вне обязательного конвейера)
+
+Не входят в типичный full-cycle; вызывайте **только при необходимости**, чтобы не раздувать контекст (см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), раздел «Дополнительные агенты»).
+
+| Агент | Когда | Назначение |
+|-------|--------|------------|
+| `1c-planner` | Phase 8 (опц.) | Черновик иерархии задач и порядка выполнения, если декомпозиция в `tasks.md` неатомарна или оркестратор не справляется; результат вручную переносится в `tasks.md` и сверяется с ADR / `Relevant Files`. Роль: `@.cursor/agents/planner.md`. |
+| `1c-code-simplifier` | Перед Phase 10 (опц.) | Упрощение читаемости **уже изменённого** кода **только по явному запросу** пользователя; затем выполняется тот же Phase 10. Роль: `@.cursor/agents/1c-code-simplifier.md`. |
+
 В каталоге `.cursor/agents/` файлы могут называться, например, `developer.md`, `architect.md`, `analytic.md`; обращение в Cursor идёт по полю `name` в frontmatter (например `name: 1c-developer`, `name: 1c-analytic`).
 
 ## Использование агентов отдельно
@@ -306,6 +315,8 @@ flowchart LR
 - «Запусти `1c-architect` для вариантов реализации интеграции с внешним API».
 - «Запусти `1c-developer` для реализации процедуры Y по краткому ТЗ».
 - «Запусти `1c-code-reviewer` для проверки последних изменений в модуле Z».
+- «Вызови `1c-planner` для черновика подзадач по утверждённому плану и ADR» (в конвейере — только если Phase 8 застряла; см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md)).
+- «Перед ревью прогони изменённые модули через `1c-code-simplifier`» (только по вашей явной просьбе).
 
 ## Установка
 
@@ -344,6 +355,7 @@ flowchart LR
 - Единый контракт **`phase9-context-index.md`** для передачи контекста в `1c-developer` или `1c-metadata-manager` (см. [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md), Phase 9).
 - Фазы **11–12**: итоги и опциональное обновление документации через `1c-doc-writer`.
 - Лимиты итераций (в т.ч. не более 10) в циклах ревью плана (Phase 7) и «исправить — снова ревью» (Phase 10).
+- Опционально: **`1c-planner`** (Phase 8) и **`1c-code-simplifier`** (перед Phase 10) — см. раздел «Дополнительные агенты» и [`SKILL.md`](.cursor/skills/1c-full-cycle-dev/SKILL.md).
 
 ## Риски и сопровождение
 
