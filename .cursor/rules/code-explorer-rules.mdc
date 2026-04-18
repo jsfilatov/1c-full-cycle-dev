@@ -1,156 +1,103 @@
 ---
+
 description: Правила исследования кодовой базы 1C
+
 alwaysApply: true
+
 ---
-### USE THIS PATH TEMPLATES
-- List of all objects: Configuration.xml
-- Object structure: [Type]/[Name].xml 
-	- Example:Catalogs/Номенклатура.xml 
-- Logic modules (code): 
-	- [Type]/[Name]/Ext/ObjectModule.bsl 
-		- Example:Catalogs/Номенклатура/Ext/ObjectModule.bsl 
-	- [Type]/[Name]/Ext/ManagerModule.bsl 
-		- Example:Catalogs/Номенклатура/Ext/ManagerModule.bsl 
-	- [Type]/[Name]/Commands/[CommandName]/Ext/CommandModule.bsl 
-		- Example:Catalogs/Номенклатура/Commands/Номенклатура/Ext/CommandModule.bsl 
-- Form structures: 
-	- [Type]/[Name]/Forms/[FormName]/Ext/Form.xml 
-		- Example:Catalogs/Номенклатура/Forms/ФормаВыбора/Ext/Form.xml 
-- Forms modules: 
-	- [Type]/[Name]/Forms/[FormName]/Ext/Form/Module.bsl
-		- Example:Catalogs/Номенклатура/Forms/ФормаВыбора/Ext/Form/Module.bsl
-- CommonForms modules: 
-	- CommonForms/[Name]/Ext/Form/Module.bsl 
-		- Example:CommonForms/АварийныйРежимИСМП/Ext/Form/Module.bsl 
-- CommonForms structures:
-	- CommonForms/[Name]/Ext/Form.xml 
-		- Example:CommonForms/АварийныйРежимИСМП/Ext/Form.xml 
-- Constants modules:
-	- Constants/[Name]/Ext/ValueManagerModule.bsl 
-		- Example:Constants/БазоваяВерсия/Ext/ValueManagerModule.bsl  
-- DefinedTypes structures:
-	- DefinedTypes/[Name].xml 
-		- Example:DefinedTypes/ВерсионируемыеДанныеОбъект.xml   
-- Enums modules
-	- Enums/[Name]/Ext/ManagerModule.bsl 
-		- Example:Enums/ВариантыОтраженияВУчетеВнеоборотныхАктивов/Ext/ManagerModule.bsl 
-- Roles structures:
-	- Roles/[Name]/Ext/Rights.xml 
-		- Example:Roles/ItobАдминистраторМониторинга/Ext/Rights.xml   
-- ChartsOfAccounts structures:
-	- ChartsOfAccounts/[Name]/Ext/Predefined.xml 
-		- Example:ChartsOfAccounts/Хозрасчетный/Ext/Predefined.xml
-- ChartsOfCharacteristicTypes structures:
-	- ChartsOfCharacteristicTypes/[Name]/Ext/Predefined.xml 
-		- Example:ChartsOfCharacteristicTypes/СтатьиРасходов/Ext/Predefined.xml 
 
-### Type Mapping (Exact spelling, Case-sensitive):
-**{Type} must be EXACTLY one of the following (case-sensitive, no changes allowed):**
-- Catalogs
-- Documents
-- InformationRegisters
-- AccumulationRegisters
-- AccountingRegisters
-- DataProcessors
-- Constants
-- CommonForms
-- CommonCommands
-- DocumentJournals
-- BusinessProcesses
-- DefinedTypes
-- Enums
-- Reports
-- Roles
-- ChartsOfCharacteristicTypes
-- ChartsOfAccounts
+### Шаблоны путей
 
-### Alias Mapping (recognition only, never for paths):
-- Справочник, Справочники, Catalog → Catalogs  
-- Документ, Документы, Document → Documents  
-- РегистрСведений, РегистрыСведений, InformationRegister → InformationRegisters  
-- РегистрНакопления, РегистрыНакопления, AccumulationRegister → AccumulationRegisters  
-- РегистрБухгалтерии, РегистрыБухгалтерии, AccountingRegister → AccountingRegisters  
-- Обработка, Обработки, DataProcessor → DataProcessors  
-- Константа, Константы, Constant → Constants  
-- ОбщаяФорма, ОбщиеФормы, CommonForm → CommonForms  
-- ЖурналДокументов, ЖурналыДокументов, DocumentJournal → DocumentJournals  
-- БизнесПроцесс, БизнесПроцессы, BusinessProcess → BusinessProcesses  
-- ОбщаяКоманда, ОбщиеКоманды, CommonCommand → CommonCommands  
-- ОпределяемыйТип, ОпределяемыеТипы, DefinedType → DefinedTypes  
-- Перечисление, Перечисления, Enum → Enums  
-- Отчет, Отчеты, Report → Reports  
-- Роль, Роли, Role → Roles
-- ПланВидовХарактеристик, ПланыВидовХарактеристик, ChartsOfCharacteristicType → ChartsOfCharacteristicTypes
-- ПланСчетов, ПланыСчетов, ChartsOfAccount → ChartsOfAccounts
+- Список объектов конфигурации: `Configuration.xml`.
+- Метаданные объекта: `[Type]/[Name].xml`.
 
-### File priority rules:
-- If logic is requested -> open *.bsl module first
-- If UI / structure is requested -> open *.xml
+| Назначение | Шаблон |
+|------------|--------|
+| Модуль объекта | `[Type]/[Name]/Ext/ObjectModule.bsl` |
+| Модуль менеджера | `[Type]/[Name]/Ext/ManagerModule.bsl` |
+| Команда | `[Type]/[Name]/Commands/[CommandName]/Ext/CommandModule.bsl` |
+| Форма (структура) | `[Type]/[Name]/Forms/[FormName]/Ext/Form.xml` |
+| Модуль формы | `[Type]/[Name]/Forms/[FormName]/Ext/Form/Module.bsl` |
+| Общая форма (структура) | `CommonForms/[Name]/Ext/Form.xml` |
+| Общая форма (модуль) | `CommonForms/[Name]/Ext/Form/Module.bsl` |
+| Константа (модуль) | `Constants/[Name]/Ext/ValueManagerModule.bsl` |
+| Определяемый тип | `DefinedTypes/[Name].xml` |
+| Перечисление (модуль) | `Enums/[Name]/Ext/ManagerModule.bsl` |
+| Роль | `Roles/[Name]/Ext/Rights.xml` |
+| План счетов (предопределённые) | `ChartsOfAccounts/[Name]/Ext/Predefined.xml` |
+| ПВХ (предопределённые) | `ChartsOfCharacteristicTypes/[Name]/Ext/Predefined.xml` |
 
-### RULE: MCP-FIRST (HIGHEST PRIORITY)
-- Перечень инструментов, серверов и сценариев «по задаче» — в `@rules/mcp-tools.mdc`; при обновлении MCP ориентируйся на него, не на устаревшие перечни в этом файле.
-- До обходного поиска по диску (grep/полный Read) — сначала MCP-инструменты, если они доступны в сессии.
-- Поиск по коду: **codesearch** (имени `search_code` в справочнике `mcp-tools.mdc` нет — не использовать как отдельное имя инструмента).
-- Метаданные: **metadatasearch** + **get_metadata_details**; альтернатива/граф — **search_metadata**, **business_search**, **answer_metadata_question** (когда нужен другой способ или нет технического имени).
-- Трассировка и архитектура: **search_function**, **get_module_structure**, **get_method_call_hierarchy**, **graph_dependencies**; контекст API — **bsl_scope_members**.
-- Документация платформы: **docinfo** (точное имя) / **docsearch** (по описанию); справка конфигурации — **helpsearch**; БСП — **ssl_search**.
-- Файловые инструменты (grep / Read с offset / sed) — вторичны: после того как MCP (или известный путь по шаблонам) указал файл и при необходимости якорь (строка, имя метода). Если MCP уже вернул диапазон строк — допускается **Read** с `offset`/`limit` без предварительного grep.
-- Нарушение: использовать grep как основной способ «найти неизвестное», когда доступен эквивалент из `mcp-tools.mdc`.
+**Общие модули:** `CommonModules/[Имя]/Ext/Module.bsl` (в таблице `[Type]` не задаётся).
+
+**Пример подстановки** `Catalogs` / `Номенклатура`: `Catalogs/Номенклатура.xml`, `Catalogs/Номенклатура/Ext/ManagerModule.bsl`, `Catalogs/Номенклатура/Forms/ФормаВыбора/Ext/Form.xml`, `Catalogs/Номенклатура/Forms/ФормаВыбора/Ext/Form/Module.bsl`.
+
+### `Type` в путях (регистр и написание — строго)
+
+Только: Catalogs, Documents, InformationRegisters, AccumulationRegisters, AccountingRegisters, DataProcessors, Constants, CommonForms, CommonCommands, DocumentJournals, BusinessProcesses, DefinedTypes, Enums, Reports, Roles, ChartsOfCharacteristicTypes, ChartsOfAccounts.
+
+### Алиасы (только распознавание; пути — только английские `Type`)
+
+| RU / EN (фрагмент) | Путь `Type` |
+|--------------------|-------------|
+| Справочник, Справочники, Catalog | Catalogs |
+| Документ, Документы, Document | Documents |
+| РегистрСведений, …, InformationRegister | InformationRegisters |
+| РегистрНакопления, …, AccumulationRegister | AccumulationRegisters |
+| РегистрБухгалтерии, …, AccountingRegister | AccountingRegisters |
+| Обработка, …, DataProcessor | DataProcessors |
+| Константа, …, Constant | Constants |
+| ОбщаяФорма, …, CommonForm | CommonForms |
+| ЖурналДокументов, …, DocumentJournal | DocumentJournals |
+| БизнесПроцесс, …, BusinessProcess | BusinessProcesses |
+| ОбщаяКоманда, …, CommonCommand | CommonCommands |
+| ОпределяемыйТип, …, DefinedType | DefinedTypes |
+| Перечисление, …, Enum | Enums |
+| Отчет, …, Report | Reports |
+| Роль, …, Role | Roles |
+| ПланВидовХарактеристик, …, ChartsOfCharacteristicType | ChartsOfCharacteristicTypes |
+| ПланСчетов, …, ChartsOfAccount | ChartsOfAccounts |
+
+### Lean pipeline: якоря HandoffRequest (`1c-lean-pipeline`)
+
+- JSON по схеме `@skills/1c-lean-pipeline/schemas/handoff-request.schema.json`, поле `anchors[]`: после MCP-first — **подсказки стартовых точек**; не подменяй ими вывод, если код или MCP иначе.
+- Расхождение якоря с файлом → приоритет у **факта** в файле и у MCP.
+
+### RULE: MCP-FIRST
+
+- Имена инструментов и сценарии — `@rules/mcp-tools.mdc`; при изменении MCP ориентир только он.
+- Пока в сессии есть подходящий MCP — **сначала** MCP; grep и «полный Read неизвестного» — после MCP или после разрешения пути шаблоном.
+- Поиск кода в MCP: **`codesearch`**. Имени **`search_code`** в `mcp-tools.mdc` нет — не использовать как имя инструмента.
+- grep / Read (`offset`/`limit`) / sed — вторичны: после файла и якоря (MCP или шаблон). Если MCP вернул диапазон строк — Read с `offset`/`limit` без предварительного grep.
+- **Запрет:** grep как основной способ найти неизвестное, если в `mcp-tools.mdc` есть MCP-эквивалент.
 
 ### RULE: NO DUPLICATE MCP SEARCHES
-- MCP search is for DISCOVERY — finding unknown files, procedures, call chains
-- Once MCP search identified files and locations — use path templates and direct reads
-- When tracing a call chain and you discover a procedure call like `ОбщийМодуль.Функция()`:
-  - Resolve the path using templates (CommonModules/ОбщийМодуль/Ext/Module.bsl)
-  - Read that file directly — DO NOT codesearch the procedure name again
-- Re-search via MCP ONLY when:
-  - The called module/object is unknown (not identified from prior search results)
-  - You need to find ALL usages of a pattern across the entire codebase
-  - The resolved file path does not exist (fallback search)
-- One MCP search per unique discovery question. Never search the same thing twice.
+
+- MCP — discovery; после нахождения — шаблоны путей и прямое чтение.
+- `ОбщийМодуль.Метод()` → `CommonModules/ОбщийМодуль/Ext/Module.bsl` → читать файл напрямую, **без** повторного codesearch по имени метода.
+- Повторный MCP только если: объект неизвестен; нужны все вхождения шаблона по конфигурации; путь по шаблону отсутствует (fallback).
+- Один MCP-запрос на одну новую задачу discovery; тот же запрос не повторять.
 
 ### RULE: STRICT 1C FILE RESOLUTION
-- When an object reference is detected, DO NOT perform global search
-- Resolve paths ONLY using the templates above
-- Use filesystem Types only
-- If a file does not exist at the resolved path — report it, do not search elsewhere
-- If logic is requested → open *.bsl first
-- If UI / structure is requested → open *.xml
 
-# STRICT Optimization Rules for TOKEN ECONOMY:
-1. ЗАПРЕЩЕНО открывать или читать файлы целиком (включая "View file").
-2. Любое чтение — фрагментарно: после **grep-hit** или после якоря от **MCP**/шаблона путей (файл ± строка / имя метода); допускается **Read** с `offset`/`limit` (или sed с диапазоном), без загрузки всего файла.
-3. Один файл — одно чтение контекста. Повторное разрешено только при новом **grep-hit** или новом **якоре MCP** по другой логике (другая гипотеза, процедура, реквизит) и если нужен блок, не покрытый предыдущим чтением.
-4. ЗАПРЕЩЕНО открывать файл для ознакомления: сначала зафиксируй цель чтения — имя процедуры/функции или строку (через grep, **search_function**, **get_module_structure** или результат **codesearch**), затем извлеки нужный блок одним проходом.
-5. После grep-hit или эквивалентного якоря (MCP) читай фрагмент (sed или Read с окном):
-	5.1. Базовый диапазон: ±100 строк.
-	5.2. Если нашел вхождение через grep, используй sed для извлечения всего релевантного блока. 
-	5.3. Если вхождение найдено в файле .bsl, извлеки весь блок (Процедуру или Функцию) целиком, включая экспортные признаки и директивы компиляции (&НаСервере, &НаКлиенте и т.д.):
-	5.3.1. Если этот метод занимает до 200 строк — извлекай его полностью.
-	5.3.2. Если этот метод больше 200 строк — используй окно контекста ±100 строк вокруг найденного совпадения.
-	5.4. Работа с XML-файлами:
-	5.4.1. Если файл > 200 строк, сначала прочитай первые 150 строк. Это необходимо, чтобы сразу определить тип объекта (Документ, Справочник и т.д.) и его базовые свойства, которые в 1С начинаются после блока пространств имен.
-	5.4.2. При поиске через grep всегда бери контекст ±50 строк вокруг найденного места.
-	5.4.3. XML 1С очень однотипен. Чтобы не перепутать реквизит шапки с реквизитом табличной части (например, "Склад" может быть и там, и там), всегда проверяй ближайший родительский тег выше по тексту (<TabularSection>, <Attributes>, <Commands>).
-	5.4.4. Смысловой поиск (Синонимы): Не игнорируй теги <Synonym>. В них содержится человеческое название реквизита на русском языке. Используй их для связи пользовательских терминов в вопросе с техническими именами в коде (например, понимание того, что "Класс номенклатуры" — это "ВидНоменклатуры").   
-6. Разделяй файлы:
-	6.1. Логика, процедуры, функции, строки в коде — только *.bsl.
-	6.2. Структура, реквизиты, метаданные — только *.xml.
-7. Нарушение = ошибка стратегии.
-8. ЗАПРЕЩЕНО открывать файлы без подтвержденного вхождения. 
-9. Прицельный поиск: Чтобы не искать по всей базе, сначала определи путь к объекту, модулю (каталоги Documents, CommonModules и т.д.), затем ищи.
-10. ЗАПРЕЩЕНО просто перепечатывать код. Выводи только ключевые фрагменты, заменяя нерелевантные части (инициализацию структур, оформление интерфейса) комментарием // ... код пропущен ...».
-11. Ответ должен быть максимвально подробным, с подробным анализом результата со всеми нюансами, это поможет лучше анализировать и использовать ответ дальше. В ответе обязательно приводи ключевые фрагменты кода которые влияют на логику работы (это необходимо для понимания алгоритма работы), заменяя нерелевантные части комментарием // ... код пропущен ...». Давай ссылки на реквизиты объектов и реквизиты форм. Обязательно приводи ссылки на файлы с указанием строк, где расположеные ключевые моменты.
+- Ссылка на объект метаданных → **без** глобального обхода репозитория; путь **только** по шаблонам выше и только перечисленные `Type`.
+- Файла нет по ожидаемому пути — сообщи явно, **не** ищи «где угодно ещё».
+- Логика → сначала `*.bsl`; структура / UI → `*.xml`.
 
-## ИНСТРУКЦИЯ ПО ГЛУБОКОМУ АНАЛИЗУ (TRACE LOGIC). Call Stack Analysis Rules: Universal Deep Tracing for 1C Logic
-0. Твоя задача провести глубокий подробный анализ. Прежде чем анализировать код, напиши список из 3-5 потенциальных мест (формы выбора, модули менеджера, общие модули), где может быть логика. Только после этого приступай к поиску.
-1. Твоя задача — распутывать цепочки вызовов (Call Stack), а не анализировать один файл изолированно.
-2. Тебе не нужно «просмотреть файл» — тебе нужно найти, где решается задача, даже если это требует нескольких переходов между объектами.
-3. Отсутствие логики в текущем файле НИКОГДА не означает отсутствие логики вообще. Это значит, что она вынесена в связанный объект.
-4. Всегда думай как трассировщик выполнения: откуда пришли данные → куда они передаются → где могла быть применена логика. Рассматривай анализ как граф. 
+### TOKEN ECONOMY и вывод ответа
 
-# AI Personality & Stability
-- Always prioritize deterministic and logical analysis over creative interpretation.
-- Use a "Strict Mode": do not guess code if it's not visible; instead, use available tools to find the source.
-- Before providing a final answer, verify the trace across multiple files (Call Stack).
-- Analyze the following task in strictly technical, step-by-step mode. Use only factual data from files. Do not hypothesize. If a link points to another object, you MUST explore it before concluding.
+1. Не читать файлы целиком (включая полный просмотр файла).
+2. Чтение только **фрагментарно** после grep-hit, якоря MCP или шаблона (цель: процедура/строка). Один файл — одно чтение контекста; снова — только при **новом** grep-hit/якоре и непокрытом блоке. Не открывать «для ознакомления»: сначала цель (**search_function**, **get_module_structure**, **codesearch**, grep), затем одно извлечение. Сначала сузь область (объект, `CommonModules`, …), потом поиск — не вся конфигурация сразу. Без подтверждённого вхождения файл не открывать.
+3. После якоря: базовое окно **±100** строк. В `.bsl` — вся процедура/функция с директивами; длина ≤200 строк — целиком; >200 — ±100 вокруг совпадения. XML >200 строк — сначала **первые 150** строк (тип объекта и база после xmlns); grep по XML — **±50**; шапка vs ТЧ — по родителю (`<TabularSection>`, `<Attributes>`, `<Commands>`); пользовательские названия — через `<Synonym>` к техническому имени реквизита.
+4. Цитаты логики из `*.bsl`; реквизиты/метаданные формы из `*.xml`.
+5. **Подробный ответ не отменяет экономию чтения:** в ответе — трассировка, выводы, нюансы; ключевые фрагменты кода с `// ... код пропущен ...` для остального; обязательны **ссылки на файлы со строками** и явные имена реквизитов объектов/форм. Раздувать ответ полным перечитыванием больших файлов — запрещено.
+
+### TRACE (call stack)
+
+0. До поиска — 3–5 гипотез мест (форма, менеджер, общий модуль, подписка, регистр).
+1. Распутывать цепочки вызовов, не один файл изолированно.
+2. Искать место решения задачи с переходами по объектам; «пусто в этом модуле» → логика может быть в связанном объекте.
+3. Поток: откуда данные → куда передаются → где логика; модель — **граф**.
+
+### Strict mode
+
+Детерминизм важнее догадок; невидимый код не выдумывать — находить инструментами. Финальный вывод — после проверки цепочки по нескольким файлам. Только факты из файлов и MCP; гипотезы без опоры — нет. Упоминание другого объекта — проследить до вывода.
